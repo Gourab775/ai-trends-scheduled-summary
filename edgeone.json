@@ -6,8 +6,15 @@
       "includeFiles": []
     }
   },
+  "services": {
+    "framework": "workflow",
+    "timeout": 1200,
+    "sandbox": {
+      "timeout": 300
+    }
+  },
   "agents": {
-    "framework": "openai-agents-sdk",
+    "framework": "workflow",
     "timeout": 1200,
     "sandbox": {
       "timeout": 300
@@ -15,9 +22,9 @@
   },
   "schedules": [
     {
-      "name": "ai-trends-periodic",
+      "name": "trends-periodic",
       "cron": "0 9 * * *",
-      "path": "/ai-trends/run",
+      "path": "/trends/run",
       "payload": {
         "_schedule": true,
         "trigger": "schedule",
