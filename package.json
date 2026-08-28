@@ -1,5 +1,6 @@
 {
-  "name": "ai-trends-scheduled-summary-node",
+  "name": "trends-scheduled-summary",
+  "description": "Professional scheduled digest workspace with multi-source collection and automated curation pipeline",
   "private": true,
   "version": "0.0.1",
   "type": "module",
