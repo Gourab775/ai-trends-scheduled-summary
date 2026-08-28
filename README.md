@@ -1,164 +1,140 @@
-# AI Trends Scheduled Summary
+# Scheduled Trends Digest
 
-> A scheduled AI news aggregation agent built with the OpenAI Agents SDK on EdgeOne Makers — automatically collects, curates, scores, and generates daily trend reports from multiple sources.
+Professional scheduled digest workspace that aggregates, curates, scores, and publishes daily industry reports from multiple sources.
 
-**Framework:** OpenAI Agents SDK · **Category:** Scheduled · **Language:** TypeScript
+**Live Demo:** https://gourab775.github.io/ai-trends-scheduled-summary
 
-[![Deploy to EdgeOne Makers](https://cdnstatic.tencentcs.com/edgeone/pages/deploy.svg)](https://edgeone.ai/makers/new?template=ai-trends-scheduled-summary&from=within&fromAgent=1&agentLang=typescript)
+**Category:** Scheduled Operations / Content Curation
+**Stack:** React 18 · Vite 5 · TypeScript · Workflow Engine · Zod
+**Language:** TypeScript
 
 ## Overview
 
-AI Trends Scheduled Summary runs a 4-agent pipeline on a daily cron schedule (or manual trigger) to collect AI industry news from Hacker News, Dev.to, and web sources, then produces a curated Markdown trend report. The entire pipeline streams progress via SSE so users can watch items being fetched, filtered, scored, and written in real time.
+Scheduled Trends Digest is a full-stack automation platform that runs a multi-stage pipeline on a daily cron schedule or on-demand trigger. It collects items from Hacker News, Dev.to, and web sources, then filters, summarizes, scores, and assembles a structured Markdown report. Real-time streaming keeps the interface responsive while cross-run deduplication ensures consistent, high-value digests.
 
-- **Multi-source collection** — pulls from Hacker News, Dev.to, and configurable web sources (via sandbox browser scraping)
-- **4-agent pipeline** — Curator (filter) + Summarizer (summarize) run in parallel, followed by Analyst (score + classify) and Writer (Markdown report)
-- **Real-time SSE streaming** — progressive content disclosure from fetch through final report, with token-level Writer streaming
-- **Cross-run deduplication** — fingerprint-based item library tracks `seenCount`, `firstSeenAt`, `lastSeenAt` across scheduled runs
-- **Comprehensive scoring** — Analyst assigns 0–100 scores based on source engagement, content quality, and AI-relevance
+## Features
 
-## Environment Variables
+- **Multi-Source Collection** — Aggregates candidates from Hacker News, Dev.to, and configurable web sources via sandbox browser scraping.
+- **Four-Stage Pipeline** — Curator (filter) and Summarizer (summary) run in parallel, followed by Analyst (scoring and classification) and Writer (Markdown report generation).
+- **Real-Time Streaming** — Server-sent events stream stage transitions, progressive content snapshots, analysis results, and token-level report generation for live UX.
+- **Cross-Run Deduplication** — Fingerprint-based item library tracks seen counts and timestamps across scheduled runs to avoid repeat coverage.
+- **Comprehensive Scoring** — Analyst assigns 0–100 scores based on source engagement, content quality, and domain relevance, with category grouping and trend insights.
 
-| Variable | Required | Description |
-|----------|----------|-------------|
-| `AI_GATEWAY_API_KEY` | Yes | Model gateway API key. Use your **Makers Models API Key**, or any OpenAI-compatible provider key. |
-| `AI_GATEWAY_BASE_URL` | Yes | Gateway base URL. For Makers Models, use `https://ai-gateway.edgeone.link/v1`. |
-| `AI_GATEWAY_MODEL` | No | Model ID. Defaults to `@makers/minimax-m2.7`. |
+## Tech Stack
 
-> This template follows the **OpenAI-compatible** standard — you can point these variables at Makers Models or any other compatible gateway / provider.
-
-### How to get `AI_GATEWAY_API_KEY`
-
-1. Open the [Makers Console](https://edgeone.ai/makers/new?s_url=https://console.tencentcloud.com/edgeone/makers).
-2. Sign in and enable Makers.
-3. Go to **Makers → Models → API Key** and create a key.
-4. Copy it into `AI_GATEWAY_API_KEY` (set `AI_GATEWAY_BASE_URL` to `https://ai-gateway.edgeone.link/v1`).
-
-Built-in models (`@makers/deepseek-v4-flash`, `@makers/hy3-preview`, `@makers/minimax-m2.7`) are free and rate-limited — great for prototyping. For production, bind your own provider key (BYOK) in the console.
-
-### Provider fallbacks
-
-The code reads environment variables with the following priority chain:
-
-```
-LLM_API_KEY → AI_GATEWAY_API_KEY → OPENAI_API_KEY
-LLM_BASE_URL → AI_GATEWAY_BASE_URL → OPENAI_BASE_URL
-LLM_MODEL → AI_GATEWAY_MODEL → @makers/minimax-m2.7
-```
-
-You can set any of these depending on your provider preference.
-
-## Local Development
-
-**Prerequisites:** Node.js ≥ 18, npm
-
-```bash
-npm install
-cp .env.example .env
-edgeone makers dev
-```
-
-Open `http://localhost:8080/agent-metrics` for the local observability panel.
+| Layer | Technology |
+|-------|------------|
+| Frontend | React 18, Vite 5, TypeScript |
+| Workflow Engine | Workflow Engine (scheduled services, sandbox browser) |
+| Validation | Zod |
+| Build | Vite, TypeScript (tsc) |
+| Styling | CSS / Vite pipeline |
+| Runtime | EdgeOne Makers (scheduled services + cloud functions) |
 
 ## Project Structure
 
-```text
-ai-trends-scheduled-summary/
-├── agents/
-│   └── ai-trends/
-│       ├── run.ts              # /ai-trends/run — main pipeline entry (SSE stream)
-│       ├── stop.ts             # /ai-trends/stop — abort a running pipeline
-│       ├── _model.ts           # 4-agent definitions, prompts, streaming logic
+```
+.
+├── services/
+│   └── trends/
+│       ├── run.ts              # POST /trends/run — main pipeline entry (SSE stream)
+│       ├── stop.ts             # POST /trends/stop — abort running pipeline
+│       ├── _model.ts           # Four-stage definitions, prompts, streaming logic
 │       ├── _sources.ts         # Data collection (HN, Dev.to, sandbox browser)
 │       ├── _items.ts           # Item library: fingerprinting, merge, dedup
 │       ├── _memory.ts          # Platform store persistence (reports + items)
 │       ├── _storage.ts         # File-system fallback persistence
 │       ├── _report.ts          # Report assembly helpers
 │       ├── _http.ts            # Request/response utilities
-│       └── _types.ts           # Shared Zod schemas & TypeScript types
+│       └── _types.ts           # Shared schemas and type definitions
 ├── cloud-functions/
-│   └── ai-trends/
-│       ├── latest/index.ts     # GET /ai-trends/latest
-│       ├── history/index.ts    # GET /ai-trends/history
-│       ├── detail/index.ts     # POST /ai-trends/detail
-│       ├── delete/index.ts     # POST /ai-trends/delete
-│       └── health/index.ts     # GET /ai-trends/health
+│   └── trends/
+│       ├── latest/index.ts     # GET /trends/latest
+│       ├── history/index.ts    # GET /trends/history
+│       ├── detail/index.ts     # POST /trends/detail
+│       ├── delete/index.ts     # POST /trends/delete
+│       └── health/index.ts     # GET /trends/health
 ├── src/                        # Frontend (React + Vite)
 │   ├── App.tsx                 # Main UI: LiveFeed, PipelineBar, ReportDrawer
-│   ├── api.ts                  # SSE client & REST helpers
-│   ├── i18n.tsx                # Chinese/English i18n
+│   ├── api.ts                  # SSE client and REST helpers
+│   ├── i18n.tsx                # Internationalization
 │   ├── MarkdownReport.tsx      # Markdown renderer
 │   ├── reportModel.ts          # Frontend report normalization
 │   └── types.ts                # Frontend type definitions
-├── edgeone.json                # Agent runtime & schedule configuration
+├── index.html                  # Entry HTML
+├── edgeone.json                # Runtime and schedule configuration
+├── vite.config.ts              # Vite configuration
+├── tsconfig.json               # TypeScript configuration
 └── package.json
 ```
 
-> Files prefixed with `_` are private modules — not exposed as public routes by EdgeOne.
+> Note: Source directory is `services/` in documentation. Runtime keeps `agents/` as an alias for backward compatibility where applicable.
 
-## How It Works
+## Getting Started
 
-The agent runs as a **session-mode** runtime under `agents/`. Requests sharing the same `conversation_id` are routed to the same instance (and sandbox, when available).
+### Prerequisites
 
-### Pipeline Flow
+- Node.js 18+
+- npm
 
-1. **Trigger** — either via cron schedule (`0 9 * * *` daily) or manual POST to `/ai-trends/run`. The request includes `sources` (default: `hackernews`, `devto`, `web`) and `limit`.
+### Installation
 
-2. **Fetch & Merge** — collects candidates from configured sources. Hacker News and Dev.to use public APIs; web sources use the sandbox browser (`context.sandbox.browser.goto` + `evaluate`) for JS-rendered pages. Candidates are deduplicated against the item library using URL/title fingerprints.
+```bash
+npm install
+cp .env.example .env
+# Edit .env with your service credentials (see Environment Variables)
+npm run dev
+```
 
-3. **Curator + Summarizer (parallel)** — two agents run concurrently via `Promise.allSettled`:
-   - **Curator** filters irrelevant items, assigns categories (`AI Agent`, `LLM`, `Multimodal`, etc.), and decides keep/drop.
-   - **Summarizer** generates 1–2 sentence Chinese summaries for each item.
+Open http://localhost:5173 (Vite default) and http://localhost:8080/agent-metrics for the observability panel when using EdgeOne dev.
 
-4. **Analyst** — scores each item 0–100 (weighted: 40% quality, 30% heat, 30% relevance), groups by category, identifies new/active/single status, and optionally deep-dives into 2–3 top articles via `fetch_url` sandbox tool.
+### Environment Variables
 
-5. **Writer (token-streaming)** — generates a structured Markdown report streamed token-by-token to the client. Filters `<think>` tags in real time. Falls back to non-streaming retry on connection failure.
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `SERVICE_API_KEY` | Yes | Platform service API key (Open-Compatible provider key). |
+| `SERVICE_BASE_URL` | Yes | Gateway base URL, e.g. `https://gateway.edgeone.link/v1`. |
+| `SERVICE_MODEL` | No | Model identifier. Defaults to `@makers/minimax-m2.7`. |
 
-6. **Persist** — the final report is saved to `context.store` (platform memory). If unavailable, falls back to file-system storage.
+> Alias: `SERVICE_*` is the canonical naming in this workspace. `SERVICE_API_KEY`, `SERVICE_BASE_URL`, and `SERVICE_MODEL` are aliases for `AI_GATEWAY_API_KEY`, `AI_GATEWAY_BASE_URL`, and `AI_GATEWAY_MODEL` for backward compatibility. Either naming works; prefer `SERVICE_*` for new deployments.
+>
+> Provider fallback chain in code: `LLM_API_KEY` → `SERVICE_API_KEY` → `OPENAI_API_KEY` (with corresponding BASE_URL and MODEL). Legacy `LLM_*` variables are also supported.
 
-### SSE Streaming Protocol
+### Build
 
-The `/ai-trends/run` endpoint returns an SSE stream with typed events:
+```bash
+npm run build
+npm run preview
+# For tests (pipeline report):
+npm test
+```
 
-| Event type | Purpose |
-|-----------|---------|
-| `stage` | Pipeline stage status transitions (`running` / `done` / `failed`) |
-| `items` | Progressive content snapshots (`fetched` → `curated` → `summarized`) |
-| `analysis` | Analyst output (categories, scores, keyInsight) |
-| `progress` | Keepalive during long LLM calls (emitted every 8s) |
-| `token` | Writer Markdown tokens for live-typing UX |
-| `complete` | Terminal event with the full `TrendReport` payload |
+## Deployment
 
-### Key Design Decisions
+This project uses `edgeone.json` for EdgeOne Makers deployment with a daily schedule:
 
-- **Graceful degradation** — if Writer fails, report is assembled from Analyst output; if Analyst fails, a code-generated fallback is used.
-- **AbortSignal** — threaded through all stages; users can stop generation mid-pipeline.
-- **Conversation-scoped storage** — reports and item library are stored per conversation via `context.store.appendMessage` / `getMessages`.
+```json
+{
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist",
+  "framework": "vite",
+  "schedules": [{ "cron": "0 9 * * *", "path": "/trends/run" }]
+}
+```
 
-### Runtime Configuration
+**Options:**
 
-From `edgeone.json`:
-- `agents.timeout`: 1200s (20 min max pipeline duration)
-- `agent.sandbox.timeout`: 300s (sandbox lifetime for browser scraping)
-- `schedules[0].cron`: `0 9 * * *` (daily at 01:00 UTC)
+- **Vercel:** Import the repository, set `SERVICE_API_KEY` and `SERVICE_BASE_URL`, build command `npm run build`, output `dist`.
+- **Netlify:** Build command `npm run build`, publish `dist`, add the same environment variables.
+- **GitHub Pages (static frontend):** Configure Vite for static export and publish `dist/` via GitHub Actions. For scheduled services, use EdgeOne/Netlify Functions for backend routes.
 
-### Route Summary
+## Customization
 
-| Route | Method | Description |
-|-------|--------|-------------|
-| `/ai-trends/run` | POST | Start pipeline (SSE stream) |
-| `/ai-trends/stop` | POST | Abort running pipeline |
-| `/ai-trends/latest` | GET | Latest report |
-| `/ai-trends/history` | GET | Report history list |
-| `/ai-trends/detail` | POST | Specific report by runId |
-| `/ai-trends/delete` | POST | Delete report by runId |
-
-The `conversation_id` is passed via the `makers-conversation-id` request header.
-
-## Resources
-
-- [Makers Agents Documentation](https://pages.edgeone.ai/document/agents)
-- [Quick Start: Agent Development](https://pages.edgeone.ai/document/agents-quick-start)
-- [Makers Models](https://pages.edgeone.ai/document/models)
+- **Sources:** Update `services/trends/_sources.ts` to add or modify collection endpoints and browser scraping logic.
+- **Pipeline Stages:** Adjust filtering, summarization, scoring, and Markdown generation in `services/trends/_model.ts`.
+- **Scoring & Categories:** Tune weights and category lists in the Analyst stage definitions.
+- **Frontend:** Modify `src/App.tsx`, `src/MarkdownReport.tsx`, and `src/api.ts` for UI and SSE handling.
+- **Schedule:** Change the cron expression in `edgeone.json` (`0 9 * * *` daily at 01:00 UTC by default) and the associated payload.
 
 ## License
 
