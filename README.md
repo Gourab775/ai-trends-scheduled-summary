@@ -98,7 +98,7 @@ Open http://localhost:5173 (Vite default) and http://localhost:8080/agent-metric
 
 > Alias: `SERVICE_*` is the canonical naming in this workspace. `SERVICE_API_KEY`, `SERVICE_BASE_URL`, and `SERVICE_MODEL` are aliases for `AI_GATEWAY_API_KEY`, `AI_GATEWAY_BASE_URL`, and `AI_GATEWAY_MODEL` for backward compatibility. Either naming works; prefer `SERVICE_*` for new deployments.
 >
-> Provider fallback chain in code: `LLM_API_KEY` → `SERVICE_API_KEY` → `OPENAI_API_KEY` (with corresponding BASE_URL and MODEL). Legacy `LLM_*` variables are also supported.
+> Provider fallback chain in code supports legacy `LLM_*` variables alongside `SERVICE_*`.
 
 ### Build
 
