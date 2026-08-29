@@ -2,7 +2,7 @@
 
 Professional scheduled digest workspace that aggregates, curates, scores, and publishes daily industry reports from multiple sources.
 
-**Live Demo:** https://ai-trends-scheduled-summary.vercel.app
+**Live Demo:** https://trends-workspace.vercel.app
 
 **Category:** Scheduled Operations / Content Curation
 **Stack:** React 18 Â· Vite 5 Â· TypeScript Â· Workflow Engine Â· Zod
