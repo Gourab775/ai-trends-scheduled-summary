@@ -1,11 +1,11 @@
-# Scheduled Trends Digest
+﻿# Scheduled Trends Digest
 
 Professional scheduled digest workspace that aggregates, curates, scores, and publishes daily industry reports from multiple sources.
 
-**Live Demo:** https://gourab775.github.io/ai-trends-scheduled-summary
+**Live Demo:** https://ai-trends-scheduled-summary.vercel.app
 
 **Category:** Scheduled Operations / Content Curation
-**Stack:** React 18 · Vite 5 · TypeScript · Workflow Engine · Zod
+**Stack:** React 18 Â· Vite 5 Â· TypeScript Â· Workflow Engine Â· Zod
 **Language:** TypeScript
 
 ## Overview
@@ -14,11 +14,11 @@ Scheduled Trends Digest is a full-stack automation platform that runs a multi-st
 
 ## Features
 
-- **Multi-Source Collection** — Aggregates candidates from Hacker News, Dev.to, and configurable web sources via sandbox browser scraping.
-- **Four-Stage Pipeline** — Curator (filter) and Summarizer (summary) run in parallel, followed by Analyst (scoring and classification) and Writer (Markdown report generation).
-- **Real-Time Streaming** — Server-sent events stream stage transitions, progressive content snapshots, analysis results, and token-level report generation for live UX.
-- **Cross-Run Deduplication** — Fingerprint-based item library tracks seen counts and timestamps across scheduled runs to avoid repeat coverage.
-- **Comprehensive Scoring** — Analyst assigns 0–100 scores based on source engagement, content quality, and domain relevance, with category grouping and trend insights.
+- **Multi-Source Collection** â€” Aggregates candidates from Hacker News, Dev.to, and configurable web sources via sandbox browser scraping.
+- **Four-Stage Pipeline** â€” Curator (filter) and Summarizer (summary) run in parallel, followed by Analyst (scoring and classification) and Writer (Markdown report generation).
+- **Real-Time Streaming** â€” Server-sent events stream stage transitions, progressive content snapshots, analysis results, and token-level report generation for live UX.
+- **Cross-Run Deduplication** â€” Fingerprint-based item library tracks seen counts and timestamps across scheduled runs to avoid repeat coverage.
+- **Comprehensive Scoring** â€” Analyst assigns 0â€“100 scores based on source engagement, content quality, and domain relevance, with category grouping and trend insights.
 
 ## Tech Stack
 
@@ -35,37 +35,37 @@ Scheduled Trends Digest is a full-stack automation platform that runs a multi-st
 
 ```
 .
-├── services/
-│   └── trends/
-│       ├── run.ts              # POST /trends/run — main pipeline entry (SSE stream)
-│       ├── stop.ts             # POST /trends/stop — abort running pipeline
-│       ├── _model.ts           # Four-stage definitions, prompts, streaming logic
-│       ├── _sources.ts         # Data collection (HN, Dev.to, sandbox browser)
-│       ├── _items.ts           # Item library: fingerprinting, merge, dedup
-│       ├── _memory.ts          # Platform store persistence (reports + items)
-│       ├── _storage.ts         # File-system fallback persistence
-│       ├── _report.ts          # Report assembly helpers
-│       ├── _http.ts            # Request/response utilities
-│       └── _types.ts           # Shared schemas and type definitions
-├── cloud-functions/
-│   └── trends/
-│       ├── latest/index.ts     # GET /trends/latest
-│       ├── history/index.ts    # GET /trends/history
-│       ├── detail/index.ts     # POST /trends/detail
-│       ├── delete/index.ts     # POST /trends/delete
-│       └── health/index.ts     # GET /trends/health
-├── src/                        # Frontend (React + Vite)
-│   ├── App.tsx                 # Main UI: LiveFeed, PipelineBar, ReportDrawer
-│   ├── api.ts                  # SSE client and REST helpers
-│   ├── i18n.tsx                # Internationalization
-│   ├── MarkdownReport.tsx      # Markdown renderer
-│   ├── reportModel.ts          # Frontend report normalization
-│   └── types.ts                # Frontend type definitions
-├── index.html                  # Entry HTML
-├── edgeone.json                # Runtime and schedule configuration
-├── vite.config.ts              # Vite configuration
-├── tsconfig.json               # TypeScript configuration
-└── package.json
+â”œâ”€â”€ services/
+â”‚   â””â”€â”€ trends/
+â”‚       â”œâ”€â”€ run.ts              # POST /trends/run â€” main pipeline entry (SSE stream)
+â”‚       â”œâ”€â”€ stop.ts             # POST /trends/stop â€” abort running pipeline
+â”‚       â”œâ”€â”€ _model.ts           # Four-stage definitions, prompts, streaming logic
+â”‚       â”œâ”€â”€ _sources.ts         # Data collection (HN, Dev.to, sandbox browser)
+â”‚       â”œâ”€â”€ _items.ts           # Item library: fingerprinting, merge, dedup
+â”‚       â”œâ”€â”€ _memory.ts          # Platform store persistence (reports + items)
+â”‚       â”œâ”€â”€ _storage.ts         # File-system fallback persistence
+â”‚       â”œâ”€â”€ _report.ts          # Report assembly helpers
+â”‚       â”œâ”€â”€ _http.ts            # Request/response utilities
+â”‚       â””â”€â”€ _types.ts           # Shared schemas and type definitions
+â”œâ”€â”€ cloud-functions/
+â”‚   â””â”€â”€ trends/
+â”‚       â”œâ”€â”€ latest/index.ts     # GET /trends/latest
+â”‚       â”œâ”€â”€ history/index.ts    # GET /trends/history
+â”‚       â”œâ”€â”€ detail/index.ts     # POST /trends/detail
+â”‚       â”œâ”€â”€ delete/index.ts     # POST /trends/delete
+â”‚       â””â”€â”€ health/index.ts     # GET /trends/health
+â”œâ”€â”€ src/                        # Frontend (React + Vite)
+â”‚   â”œâ”€â”€ App.tsx                 # Main UI: LiveFeed, PipelineBar, ReportDrawer
+â”‚   â”œâ”€â”€ api.ts                  # SSE client and REST helpers
+â”‚   â”œâ”€â”€ i18n.tsx                # Internationalization
+â”‚   â”œâ”€â”€ MarkdownReport.tsx      # Markdown renderer
+â”‚   â”œâ”€â”€ reportModel.ts          # Frontend report normalization
+â”‚   â””â”€â”€ types.ts                # Frontend type definitions
+â”œâ”€â”€ index.html                  # Entry HTML
+â”œâ”€â”€ edgeone.json                # Runtime and schedule configuration
+â”œâ”€â”€ vite.config.ts              # Vite configuration
+â”œâ”€â”€ tsconfig.json               # TypeScript configuration
+â””â”€â”€ package.json
 ```
 
 > Note: Source directory is `services/` in documentation. Runtime keeps `agents/` as an alias for backward compatibility where applicable.
