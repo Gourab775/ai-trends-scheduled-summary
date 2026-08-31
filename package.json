@@ -1,27 +1,27 @@
-{
-  "name": "trends-scheduled-summary",
-  "description": "Professional scheduled digest workspace with multi-source collection and automated curation pipeline",
-  "private": true,
-  "version": "0.0.1",
-  "type": "module",
-  "scripts": {
-    "dev": "vite",
-    "test": "tsc -p tsconfig.test.json && node .test-build/tests/report-pipeline.test.js",
-    "build": "tsc -p tsconfig.json && tsc -p tsconfig.agent.json && vite build",
-    "preview": "vite preview"
-  },
-  "dependencies": {
-    "@openai/agents": "^0.10.1",
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1",
-    "zod": "^4.3.6"
-  },
-  "devDependencies": {
-    "@types/node": "^22.0.0",
-    "@types/react": "^18.3.1",
-    "@types/react-dom": "^18.3.1",
-    "@vitejs/plugin-react": "^4.3.1",
-    "typescript": "^5.5.3",
-    "vite": "^5.4.2"
-  }
+﻿{
+    "name":  "trends-workspace",
+    "description":  "Professional scheduled digest workspace with multi-source collection and automated curation pipeline",
+    "private":  true,
+    "version":  "0.0.1",
+    "type":  "module",
+    "scripts":  {
+                    "dev":  "vite",
+                    "test":  "tsc -p tsconfig.test.json \u0026\u0026 node .test-build/tests/report-pipeline.test.js",
+                    "build":  "tsc -p tsconfig.json \u0026\u0026 tsc -p tsconfig.agent.json \u0026\u0026 vite build",
+                    "preview":  "vite preview"
+                },
+    "dependencies":  {
+                         "@openai/agents":  "^0.10.1",
+                         "react":  "^18.3.1",
+                         "react-dom":  "^18.3.1",
+                         "zod":  "^4.3.6"
+                     },
+    "devDependencies":  {
+                            "@types/node":  "^22.0.0",
+                            "@types/react":  "^18.3.1",
+                            "@types/react-dom":  "^18.3.1",
+                            "@vitejs/plugin-react":  "^4.3.1",
+                            "typescript":  "^5.5.3",
+                            "vite":  "^5.4.2"
+                        }
 }
