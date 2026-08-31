@@ -56,7 +56,7 @@ async function run() {
   assert.ok(!cleaned.includes('<a'));
   assert.ok(!cleaned.includes('&#x2F;'));
   assert.ok(!fallbackSummary.includes('<a'));
-  assert.ok(!fallbackSummary.includes('建议结合源站内容继续核验'));
+  assert.ok(!fallbackSummary.includes('Please verify with source'));
 
   const report = generateFallbackReport([
     {

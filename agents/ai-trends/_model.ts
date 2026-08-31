@@ -20,10 +20,18 @@ import {
 
 // ── OpenAI client setup (via AI Gateway) ──────────────────────────
 
-function createModel(env: Record<string, string | undefined>): OpenAIChatCompletionsModel {
-  const client = new OpenAI({
+export function buildOpenAIClientOptions(env: Record<string, string | undefined>): { apiKey?: string; baseURL?: string } {
+  return {
     apiKey: env.LLM_API_KEY || env.AI_GATEWAY_API_KEY || env.OPENAI_API_KEY,
     baseURL: env.LLM_BASE_URL || env.AI_GATEWAY_BASE_URL || env.OPENAI_BASE_URL,
+  };
+}
+
+function createModel(env: Record<string, string | undefined>): OpenAIChatCompletionsModel {
+  const opts = buildOpenAIClientOptions(env);
+  const client = new OpenAI({
+    apiKey: opts.apiKey,
+    baseURL: opts.baseURL,
     timeout: 600000,
   });
   const modelName = env.LLM_MODEL || env.AI_GATEWAY_MODEL || '@makers/minimax-m2.7';
@@ -101,16 +109,16 @@ function parseJsonFromText<T>(text: string): T | null {
 // ── Tool definitions ──────────────────────────────────────────────
 
 /**
- * Create a sandbox-powered fetch tool for Agents (用法 A).
+ * Create a sandbox-powered fetch tool for Agents (usage A).
  * Uses context.sandbox.commands.run('curl ...') to fetch URL content.
  * Compatible with ChatCompletions API via @openai/agents tool().
  */
 function createSandboxFetchTool(sandbox: any) {
   return tool({
     name: 'fetch_url',
-    description: '通过沙箱执行 curl 命令获取指定 URL 的网页内容（前 3000 字符）。当你需要了解某篇文章的详细内容以辅助趋势判断时使用此工具。',
+    description: 'Fetch webpage content for given URL via sandbox curl (first 3000 chars). Use this tool when you need to understand detailed content of an article to assist trend judgment.',
     parameters: z.object({
-      url: z.string().min(1).describe('要获取内容的完整 URL'),
+      url: z.string().min(1).describe('Full URL to fetch'),
     }),
     execute: async (input: { url: string }) => {
       console.log(`[fetch_url] Agent called fetch_url: ${input.url}`);
@@ -135,7 +143,7 @@ function createSandboxFetchTool(sandbox: any) {
 function createGetHistoryItemsTool(historyItems: TrendLibraryItem[]) {
   return tool({
     name: 'get_history_items',
-    description: '检索历史 AI 资讯条目，用于对比当前与过去的趋势数据。返回指定时间范围内的历史条目。',
+    description: 'Retrieve historical AI news items to compare current vs past trends. Returns items within a specified time range.',
     parameters: GetHistoryItemsParamsSchema,
     execute: async (input: { maxItems?: number; daysBack?: number }) => {
       const maxItems = input.maxItems ?? 50;
@@ -163,7 +171,7 @@ function createComparePeriodsTool(
 ) {
   return tool({
     name: 'compare_periods',
-    description: '对比当前周期与前一周期的趋势数据差异，按指定维度(count/categories/sources)进行分析。',
+    description: 'Compare trend data differences between current and previous period by specified dimension (count/categories/sources).',
     parameters: ComparePeriodsParamsSchema,
     execute: async (input: { currentItemIds: string[]; metric: 'count' | 'categories' | 'sources' }) => {
       const currentSet = new Set(input.currentItemIds);
@@ -196,16 +204,16 @@ function createCuratorAgent(env: Record<string, string | undefined>) {
   return new Agent({
     name: 'CuratorAgent',
     instructions: [
-      '你是 AI 趋势策展专家。从原始候选内容中筛选和分类。',
+      'You are an AI trend curation expert. Filter and classify from raw candidate content.',
       '',
-      '策展标准：',
-      '1. 只保留与 AI Agent、LLM、多模态、开源模型、AI Infra、AI 产品直接相关的内容；',
-      '2. 排除纯招聘帖、营销软文、重复/低质量内容；',
-      '3. 为每条内容重新判定 category（AI Agent / LLM / Multimodal / Open Source Model / AI Infra / AI Industry）；',
-      '4. keep=true 表示保留，keep=false 表示丢弃；',
-      '5. reason 简述保留或丢弃原因（中文）。',
+      'Curation criteria:',
+      '1. Keep only content directly related to AI Agent, LLM, Multimodal, Open Source Model, AI Infra, AI Products;',
+      '2. Exclude pure job postings, marketing advertorials, duplicate/low-quality content;',
+      '3. Re-evaluate category for each item (AI Agent / LLM / Multimodal / Open Source Model / AI Infra / AI Industry);',
+      '4. keep=true means keep, keep=false means discard;',
+      '5. reason briefly explains the keep/discard reason (in English).',
       '',
-      '你必须只输出 JSON，格式如下（不要包含其他文字）：',
+      'You must output only JSON, format as follows (no other text):',
       '{"items":[{"id":"...","title":"...","url":"...","category":"...","reason":"...","keep":true}],"droppedCount":5,"curatorNotes":"..."}',
     ].join('\n'),
     model: createModel(env),
@@ -216,14 +224,14 @@ function createSummarizerAgent(env: Record<string, string | undefined>) {
   return new Agent({
     name: 'SummarizerAgent',
     instructions: [
-      '你是 AI 资讯摘要专家。为每条 AI 相关资讯生成简洁的中文摘要。',
+      'You are an AI news summarization expert. Generate concise English summaries for each AI-related update.',
       '',
-      '要求：',
-      '1. 每条摘要 1-2 句话，提炼核心信息；',
-      '2. 不要输出 HTML；',
-      '3. 不要使用"建议结合源站内容继续核验"这类泛泛兜底；',
+      'Requirements:',
+      '1. Each summary 1-2 sentences, distill core information;',
+      '2. Do not output HTML;',
+      '3. Do not use generic placeholders like "Please verify with source";',
       '',
-      '你必须只输出 JSON，格式如下（不要包含其他文字）：',
+      'You must output only JSON, format as follows (no other text):',
       '{"items":[{"id":"...","aiSummary":"..."}]}',
     ].join('\n'),
     model: createModel(env),
@@ -240,30 +248,30 @@ function createAnalystAgent(
     createGetHistoryItemsTool(historyItems),
     createComparePeriodsTool(currentItems, historyItems),
   ];
-  // Inject sandbox fetch tool if sandbox is available (用法 A: Agent 自主调用沙箱)
+  // Inject sandbox fetch tool if sandbox is available (usage A: Agent autonomously calls sandbox)
   if (sandbox && typeof (sandbox as any)?.commands?.run === 'function') {
     tools.push(createSandboxFetchTool(sandbox));
   }
   return new Agent({
     name: 'AnalystAgent',
     instructions: [
-      '你是资深 AI 行业分析师。根据当前资讯和历史数据，对条目进行分类和重要性判断。',
+      'You are a senior AI industry analyst. Classify and assess importance based on current news and historical data.',
       '',
-      '分析要求：',
-      '1. 将条目客观分为：',
-      '   - new：本次首次采集到（isNew=true）',
-      '   - active：连续多次出现（seenCount >= 2）',
-      '   - single：仅出现一次但值得记录',
-      '2. 按 category 对条目分组（AI Agent / LLM / Multimodal / Open Source Model / AI Infra / AI Industry）；',
-      '3. 使用 get_history_items 工具获取历史数据，判断哪些是持续活跃的条目；',
-      '4. 如果有 fetch_url 工具可用，选择 2-3 个你认为最重要的条目深入了解其内容，给出简短分析；',
-      '5. 所有结论必须基于实际数据，不编造事实；',
-      '6. 使用 fetch_url 时限制在最重要的 2-3 篇，不要对每条都调用；',
+      'Analysis requirements:',
+      '1. Objectively classify items as:',
+      '   - new: first collected in this run (isNew=true)',
+      '   - active: appeared consecutively multiple times (seenCount >= 2)',
+      '   - single: appeared only once but worth recording',
+      '2. Group items by category (AI Agent / LLM / Multimodal / Open Source Model / AI Infra / AI Industry);',
+      '3. Use get_history_items tool to retrieve historical data and determine which items are continuously active;',
+      '4. If fetch_url tool is available, select 2-3 items you consider most important to fetch and provide brief analysis;',
+      '5. All conclusions must be based on actual data, do not fabricate facts;',
+      '6. Limit fetch_url to the most important 2-3 items, do not call for every item;',
       '',
-      '最终你必须只输出 JSON（不要包含其他文字），格式如下：',
-      '{"categories":[{"name":"AI Agent","items":[{"id":"...","title":"...","status":"new|active|single","importance":"high|medium|low"}]}],"deepDives":[{"id":"...","title":"...","insight":"一句话分析"}],"keyInsight":"一段综合性核心洞察（不超过80字）","scores":[{"id":"...","score":82}]}',
+      'You must output only JSON (no other text), format as follows:',
+      '{"categories":[{"name":"AI Agent","items":[{"id":"...","title":"...","status":"new|active|single","importance":"high|medium|low"}]}],"deepDives":[{"id":"...","title":"...","insight":"one-sentence analysis"}],"keyInsight":"comprehensive core insight (under 80 characters)","scores":[{"id":"...","score":82}]}',
       '',
-      '其中 scores 是为每条保留的资讯打的综合推荐分（0-100），每条都必须有。',
+      'Where scores is the comprehensive recommendation score (0-100) for each retained item, every item must have one.',
     ].join('\n'),
     model: createModel(env),
     tools,
@@ -274,41 +282,41 @@ function createWriterAgent(env: Record<string, string | undefined>) {
   return new Agent({
     name: 'WriterAgent',
     instructions: [
-      '你是 AI 趋势报告撰写专家。基于结构化分析数据，撰写结构统一的中文 Markdown 报告。',
+      'You are an AI trend report writer. Based on structured analysis data, write a standardized Markdown report in English.',
       '',
-      '报告必须严格遵循以下结构（不要增减章节）：',
+      'Report must strictly follow the structure below (do not add or remove sections):',
       '',
-      '# AI 趋势日报',
+      '# AI Trend Daily',
       '',
-      '## 今日要点',
-      '（2-3 句核心发现，不超过 100 字，基于 keyInsight 字段扩写）',
+      '## Key Highlights',
+      '(2-3 core findings, under 100 words, expanded from keyInsight field)',
       '',
-      '## 热门动态',
-      '（按 category 分组展示。每条格式：`- [标题](url) — 一句话摘要`）',
+      '## Trending Now',
+      '(Grouped by category. Each item format: `- [Title](url) — one-sentence summary`)',
       '',
       '### AI Agent',
-      '- [标题](url) — 摘要',
+      '- [Title](url) — summary',
       '',
       '### LLM',
-      '- [标题](url) — 摘要',
+      '- [Title](url) — summary',
       '',
-      '（其他 category 同理，没有条目的 category 省略）',
+      '(Other categories likewise, omit categories with no items)',
       '',
-      '## 新出现',
-      '（status=new 的条目，说明首次被采集到）',
+      '## New Arrivals',
+      '(Items with status=new, indicating first-time collection)',
       '',
-      '## 持续活跃',
-      '（status=active 的条目，说明连续多次出现，列出 seenCount）',
+      '## Sustained Activity',
+      '(Items with status=active, indicating consecutive appearances, list seenCount)',
       '',
-      '## 深度分析',
-      '（基于 deepDives 字段，2-3 个被深入分析过的条目，附带 insight）',
+      '## Deep Dive',
+      '(Based on deepDives field, 2-3 deeply analyzed items with insight)',
       '',
-      '写作要求：',
-      '1. 所有来源链接使用 Markdown 超链接格式 [title](url)；',
-      '2. 不编造来源，所有链接必须来自输入数据；',
-      '3. 风格简洁专业，全文控制在 1500-3000 字；',
-      '4. 直接输出 Markdown 内容，不要包裹在 JSON 或代码块中；',
-      '5. 不要添加 "后续关注问题" 之类没有数据支撑的章节。',
+      'Writing requirements:',
+      '1. All source links use Markdown hyperlink format [title](url);',
+      '2. Do not fabricate sources, all links must come from input data;',
+      '3. Style concise and professional, total length 1500-3000 words;',
+      '4. Output Markdown content directly, do not wrap in JSON or code blocks;',
+      '5. Do not add unsupported sections like "Follow-up Questions".',
     ].join('\n'),
     model: createModel(env),
   });
@@ -320,7 +328,7 @@ function buildItemsJson(items: TrendSourceItem[]): string {
   return JSON.stringify(items.slice(0, 30).map(item => ({
     id: item.id, title: item.title, url: item.url,
     source: item.source, category: item.category,
-    sourceScore: item.score ?? 0, // 源站真实互动数据（HN upvotes / DevTo reactions / 0=无数据）
+    sourceScore: item.score ?? 0, // Real engagement data from source (HN upvotes / DevTo reactions / 0=no data)
     summary: item.summary,
     isNew: item.isNew ?? false, seenCount: item.seenCount ?? 1,
   })));
@@ -328,45 +336,45 @@ function buildItemsJson(items: TrendSourceItem[]): string {
 
 function buildAnalystPrompt(items: TrendSourceItem[], noNewItems?: boolean): string {
   const lines = [
-    '请分析以下 AI 资讯条目，按 category 分组并判断重要性。',
-    '先使用 get_history_items 工具获取历史数据，判断哪些条目是持续活跃的。',
-    '然后选择 2-3 个最重要的条目使用 fetch_url 深入了解。',
-    '最后输出分析结果 JSON。',
+    'Please analyze the following AI news items, group by category and assess importance.',
+    'First use get_history_items to retrieve historical data and determine which items are continuously active.',
+    'Then select 2-3 most important items to fetch via fetch_url for deeper understanding.',
+    'Finally output analysis result JSON.',
     '',
-    '【重要】你必须为每条保留的资讯打一个 0-100 的综合推荐分（scores 字段）：',
-    '  - 热度（30%）：参考 sourceScore（源站真实互动数据）+ 话题讨论量。sourceScore=0 表示无互动数据，需依据标题/内容判断。',
-    '  - 质量（40%）：原创深度内容、首发消息、技术突破 > 二手转述 > 营销软文。你已通过 fetch_url 阅读部分文章，请据此判断内容深度。',
-    '  - 相关度（30%）：与 AI 核心话题（Agent/LLM/多模态/开源模型/Infra）的直接贴合程度。',
+    '[IMPORTANT] You must assign a 0-100 comprehensive recommendation score (scores field) for each retained item:',
+    '  - Popularity (30%): reference sourceScore (real engagement data from source) + topic volume. sourceScore=0 means no engagement data, judge by title/content.',
+    '  - Quality (40%): original deep content, first-hand news, technical breakthrough > second-hand repost > marketing fluff. You have read some articles via fetch_url, judge depth accordingly.',
+    '  - Relevance (30%): direct alignment with AI core topics (Agent/LLM/Multimodal/Open Source Model/Infra).',
     '',
-    '评分参考：',
-    '  95-100: 划时代事件（如 GPT-5 发布）',
-    '  80-94: 重大进展/深度首发（如新模型开源、重要论文）',
-    '  65-79: 值得关注的行业动态/技术博客',
-    '  50-64: 一般性资讯/二手转述',
-    '  <50: 边缘相关（通常已被 Curator 过滤）',
+    'Scoring reference:',
+    '  95-100: Epoch-making event (e.g. GPT-5 release)',
+    '  80-94: Major progress / deep exclusive (e.g. new model open source, important paper)',
+    '  65-79: Noteworthy industry update / technical blog',
+    '  50-64: General news / second-hand repost',
+    '  <50: Marginally relevant (usually filtered by Curator)',
     '',
   ];
   if (noNewItems) {
-    lines.push('⚠️ 本次采集未发现新增内容，请重点分析持续活跃的条目。', '');
+    lines.push('Note: No new content found in this collection, please focus on continuously active items.', '');
   }
-  lines.push(`当前资讯条目：${buildItemsJson(items)}`);
+  lines.push(`Current news items: ${buildItemsJson(items)}`);
   return lines.join('\n');
 }
 
 function buildWriterPrompt(items: TrendSourceItem[], analysis: TrendAnalysis | null, noNewItems?: boolean): string {
   const lines: string[] = [];
   if (analysis) {
-    lines.push('请基于以下结构化分析数据，严格按照你的报告结构模板撰写报告：', '', `分析数据：${JSON.stringify(analysis)}`);
+    lines.push('Please write the report strictly according to your report structure template based on the following structured analysis data:', '', `Analysis data: ${JSON.stringify(analysis)}`);
   } else {
-    lines.push('分析师未能生成分析数据，请直接基于以下资讯条目按报告结构模板撰写：');
+    lines.push('Analyst failed to generate analysis data, please write directly based on the following news items according to the report structure template:');
   }
   // Data source summary for the report header
   const sourceCounts = items.reduce((acc, i) => { const k = i.source || 'unknown'; acc[k] = (acc[k] || 0) + 1; return acc; }, {} as Record<string, number>);
   const newCount = items.filter(i => i.isNew).length;
-  lines.push('', `数据源统计：${JSON.stringify(sourceCounts)}，新增 ${newCount} 条`);
-  lines.push('', '原始条目（含 url、category、aiSummary，用于填充报告链接和摘要）：', buildItemsJson(items));
+  lines.push('', `Data source stats: ${JSON.stringify(sourceCounts)}, ${newCount} new items`);
+  lines.push('', 'Original items (including url, category, aiSummary for filling report links and summaries):', buildItemsJson(items));
   if (noNewItems) {
-    lines.push('', '⚠️ 本次未发现新增内容。在"今日要点"中注明，"新出现"章节写"本次无新增条目"。');
+    lines.push('', 'Note: No new content found. Mention in "Key Highlights", write "No new items in this run" in the "New Arrivals" section.');
   }
   return lines.join('\n');
 }
@@ -381,7 +389,7 @@ function buildTrendGroups(items: TrendSourceItem[]): TrendGroup[] {
   }
   return Array.from(grouped.entries()).map(([category, catItems]) => ({
     category,
-    summary: catItems.slice(0, 3).map(i => i.title).join('；'),
+    summary: catItems.slice(0, 3).map(i => i.title).join('; '),
     count: catItems.length,
     items: catItems.slice(0, 5),
   }));
@@ -389,7 +397,7 @@ function buildTrendGroups(items: TrendSourceItem[]): TrendGroup[] {
 
 function assembleReportFromWriter(items: TrendSourceItem[], markdown: string, runId: string, trigger: string): TrendReport {
   const firstLine = markdown.split('\n').find(l => l.trim() && !l.startsWith('#'))?.trim() || '';
-  const summary = firstLine.slice(0, 120) || `${items.length} 条 AI 资讯趋势分析`;
+  const summary = firstLine.slice(0, 120) || `${items.length} AI news trend analysis`;
   return {
     runId,
     status: 'success',
@@ -404,11 +412,11 @@ function assembleReportFromWriter(items: TrendSourceItem[], markdown: string, ru
 }
 
 function assembleReportFromAnalysis(items: TrendSourceItem[], analysis: TrendAnalysis, runId: string, trigger: string): TrendReport {
-  const lines = ['# AI 趋势日报', '', `> ${analysis.keyInsight}`, ''];
+  const lines = ['# AI Trend Daily', '', `> ${analysis.keyInsight}`, ''];
 
   // Group by category from analyst output
   if (analysis.categories?.length) {
-    lines.push('## 热门动态', '');
+    lines.push('## Trending Now', '');
     for (const cat of analysis.categories) {
       lines.push(`### ${cat.name}`, '');
       for (const entry of cat.items) {
@@ -423,7 +431,7 @@ function assembleReportFromAnalysis(items: TrendSourceItem[], analysis: TrendAna
 
   // Deep dives
   if (analysis.deepDives?.length) {
-    lines.push('## 深度分析', '');
+    lines.push('## Deep Dive', '');
     for (const dd of analysis.deepDives) {
       const item = items.find(i => i.id === dd.id);
       const url = item?.url || '';
@@ -566,8 +574,8 @@ export async function runAgentPipeline(input: PipelineInput): Promise<{
     const itemsJson = buildItemsJson(items);
 
     const [curatorResult, summarizerResult] = await Promise.allSettled([
-      streamWithProgress(curatorAgent, `请策展以下候选内容：\n${itemsJson}`, 'curator', emit, 8000, signal),
-      streamWithProgress(summarizerAgent, `请为以下资讯生成中文摘要：\n${itemsJson}`, 'summarizer', emit, 8000, signal),
+      streamWithProgress(curatorAgent, `Please curate the following candidate content:\n${itemsJson}`, 'curator', emit, 8000, signal),
+      streamWithProgress(summarizerAgent, `Please generate English summaries for the following news:\n${itemsJson}`, 'summarizer', emit, 8000, signal),
     ]);
     console.log(`[pipeline] Stage 1+2 done (${((Date.now() - t0) / 1000).toFixed(1)}s)`);
     const stage12Duration = (Date.now() - t0) / 1000;

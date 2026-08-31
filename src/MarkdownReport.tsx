@@ -47,13 +47,13 @@ export default function MarkdownReport({ markdown }: MarkdownReportProps) {
           return <h3 key={index}>{line.slice(4)}</h3>;
         }
 
-        // Meta rows (生成时间：... / 分析内容：...)
-        if (line.startsWith('生成时间：') || line.startsWith('分析内容：')) {
-          const [label, ...rest] = line.split('：');
+        // Meta rows (Generated: ... / Analysis: ...)
+        if (line.startsWith('Generated:') || line.startsWith('Analysis:')) {
+          const [label, ...rest] = line.split(':');
           return (
             <div key={index} className={styles.reportMetaRow}>
               <span>{label}</span>
-              <strong>{rest.join('：')}</strong>
+              <strong>{rest.join(':')}</strong>
             </div>
           );
         }

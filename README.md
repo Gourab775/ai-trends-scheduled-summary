@@ -1,4 +1,4 @@
-﻿# Scheduled Trends Digest
+# Scheduled Trends Digest
 
 Professional scheduled digest workspace that aggregates, curates, scores, and publishes daily industry reports from multiple sources.
 

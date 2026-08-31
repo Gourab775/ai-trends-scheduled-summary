@@ -7,9 +7,9 @@ import { EMPTY_REPORT, normalizeReport } from './reportModel';
 import type { AnalystCategoryEvent, AnalystDeepDiveEvent, HistoryEntry, ItemPhase, PipelineEvent, TrendItem, TrendReport } from './types';
 import styles from './App.module.css';
 
-function formatTime(value?: string, locale = 'zh-CN'): string {
+function formatTime(value?: string, locale = 'en-US'): string {
   if (!value) return '';
-  return new Intl.DateTimeFormat(locale === 'zh' ? 'zh-CN' : 'en-US', {
+  return new Intl.DateTimeFormat('en-US', {
     month: '2-digit',
     day: '2-digit',
     hour: '2-digit',
@@ -443,7 +443,7 @@ function OnboardingHero({ onStart, loading }: { onStart: () => void; loading: bo
    Main App
    ==================================== */
 export default function App() {
-  const { t, locale, toggleLocale } = useI18n();
+  const { t, locale } = useI18n();
   const [report, setReport] = useState<TrendReport>(EMPTY_REPORT);
   const [history, setHistory] = useState<HistoryEntry[]>([]);
   const [loading, setLoading] = useState(false);
@@ -741,9 +741,6 @@ export default function App() {
         <a className={styles.topCornerIcon} href="https://github.com/TencentEdgeOne/ai-trends-agent" target="_blank" rel="noreferrer" title="GitHub">
           <IconGitHub size={16} />
         </a>
-        <button className={styles.langToggle} onClick={toggleLocale} title={locale === 'zh' ? 'Switch to English' : '切换为中文'}>
-          {locale === 'zh' ? 'EN' : '中'}
-        </button>
       </div>
       <header className={styles.topbar}>
         <div className={styles.brandBlock}>

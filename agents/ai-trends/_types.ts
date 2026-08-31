@@ -68,7 +68,7 @@ export const CuratedItemSchema = z.object({
   url: z.string(),
   source: z.string().optional(),
   category: z.string().describe('AI Agent / LLM / Multimodal / Open Source Model / AI Infra / AI Industry'),
-  reason: z.string().describe('Brief reason for keep/drop decision (Chinese)'),
+  reason: z.string().describe('Brief reason for keep/drop decision (English)'),
   keep: z.boolean().describe('true to include, false to drop'),
 });
 export type CuratedItem = z.infer<typeof CuratedItemSchema>;
@@ -83,7 +83,7 @@ export type CuratorOutput = z.infer<typeof CuratorOutputSchema>;
 // Agent 2: Summarizer output
 export const SummarizedItemSchema = z.object({
   id: z.string(),
-  aiSummary: z.string().describe('1-2 sentence Chinese summary'),
+  aiSummary: z.string().describe('1-2 sentence English summary'),
 });
 export type SummarizedItem = z.infer<typeof SummarizedItemSchema>;
 
@@ -114,11 +114,11 @@ export const DeepDiveSchema = z.object({
 export const TrendAnalysisSchema = z.object({
   categories: z.array(AnalystCategorySchema),
   deepDives: z.array(DeepDiveSchema).optional(),
-  keyInsight: z.string().describe('Core insight in under 80 chars (Chinese)'),
+  keyInsight: z.string().describe('Core insight in under 80 characters (English)'),
   scores: z.array(z.object({
     id: z.string(),
-    score: z.number().describe('0-100 综合推荐分'),
-  })).describe('每条保留资讯的综合推荐评分（0-100）'),
+    score: z.number().describe('0-100 comprehensive recommendation score'),
+  })).describe('Comprehensive recommendation score (0-100) for each retained item'),
 });
 export type TrendAnalysis = z.infer<typeof TrendAnalysisSchema>;
 
@@ -126,7 +126,7 @@ export type TrendAnalysis = z.infer<typeof TrendAnalysisSchema>;
 export const TrendEntrySchema = z.object({
   trendName: z.string(),
   status: z.enum(['new', 'rising', 'stable', 'cooling']),
-  description: z.string().describe('2-3 sentence Chinese description'),
+  description: z.string().describe('2-3 sentence English description'),
   impact: z.enum(['high', 'medium', 'low']),
   relatedItemIds: z.array(z.string()).describe('IDs of items supporting this trend'),
 });

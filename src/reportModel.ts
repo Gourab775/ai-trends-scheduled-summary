@@ -2,8 +2,8 @@ import type { TrendReport } from './types';
 
 export const EMPTY_REPORT: TrendReport = {
   status: 'empty',
-  summary: '还没有生成过 AI 趋势报告。',
-  reportMarkdown: '# AI 趋势日报\n\n点击“立即生成”开始采集 Hacker News 与 Dev.to 的 AI 动态。',
+  summary: 'No AI trend report generated yet.',
+  reportMarkdown: '# AI Trend Daily\n\nClick \'Generate\' to start collecting AI updates from Hacker News and Dev.to.',
   trends: [],
   items: [],
 };

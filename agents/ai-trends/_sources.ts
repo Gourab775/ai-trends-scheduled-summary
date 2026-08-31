@@ -21,20 +21,13 @@ export const AI_KEYWORDS = [
   'vector database',
   'model context protocol',
   'mcp',
-  // Chinese keywords
-  '人工智能',
-  '大模型',
-  '大语言模型',
-  '智能体',
-  '多模态',
-  '开源模型',
-  '向量数据库',
-  '机器学习',
-  '深度学习',
-  '生成式',
-  'ai agent',
-  'ai应用',
-  'ai工具',
+  'artificial intelligence',
+  'large model',
+  'machine learning',
+  'deep learning',
+  'generative',
+  'ai application',
+  'ai tool',
 ];
 
 const CATEGORY_KEYWORDS: Record<string, string[]> = {
@@ -73,9 +66,9 @@ export function buildFallbackAiSummary(item: TrendSourceItem): string {
   if (cleanedSummary && !isUrlOnly(cleanedSummary) && cleanedSummary.length >= 24) {
     return cleanedSummary.slice(0, 220);
   }
-  const title = cleanText(item.title) || '该动态';
+  const title = cleanText(item.title) || 'This update';
   const category = item.category || inferCategory(item);
-  return `${category} 动态：${title}。`;
+  return `${category} Update: ${title}.`;
 }
 
 async function fetchJson<T>(url: string): Promise<T> {
@@ -262,7 +255,7 @@ export async function collectFromWeb(
             source: ws.source,
             title: cleanText(raw.title),
             url: raw.url.startsWith('http') ? raw.url : new URL(raw.url, ws.url).href,
-            score: raw.score ?? 0, // Web 源无真实互动数据，Agent 会根据内容综合打分
+            score: raw.score ?? 0, // Web source has no real engagement data, Agent will score comprehensively based on content
             publishedAt: nowIso(),
             summary: raw.summary || '',
           });

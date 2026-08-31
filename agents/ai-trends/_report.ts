@@ -17,8 +17,8 @@ function formatReportTime(value: string): string {
 
 function summarizeCategory(category: string, items: TrendSourceItem[]): string {
   const titles = items.slice(0, 3).map(item => item.title).filter(Boolean);
-  if (!titles.length) return `${category} 方向有少量动态，建议继续观察。`;
-  return `${category} 方向出现 ${items.length} 条相关动态，代表内容包括：${titles.join('；')}。`;
+  if (!titles.length) return `${category} has limited activity, suggest continued observation.`;
+  return `${category} shows ${items.length} related updates, including: ${titles.join('; ')}.`;
 }
 
 export function generateMarkdown(items: TrendSourceItem[], generatedAt: string): { markdown: string; trends: TrendGroup[] } {
@@ -30,29 +30,29 @@ export function generateMarkdown(items: TrendSourceItem[], generatedAt: string):
 
   const trends: TrendGroup[] = [];
   const lines = [
-    '# AI 趋势日报',
+    '# AI Trend Daily',
     '',
-    `生成时间：${formatReportTime(generatedAt)}`,
-    `分析内容：${items.length} 条候选动态`,
+    `Generated: ${formatReportTime(generatedAt)}`,
+    `Analysis: ${items.length} candidate updates`,
     '',
-    '## 今日趋势概览',
+    "## Today's Trend Overview",
     '',
   ];
 
   if (!items.length) {
-    lines.push('暂无满足条件的 AI 趋势内容。建议稍后重试或扩展数据源。', '');
+    lines.push('No qualified AI trend content found. Please try again later or expand data sources.', '');
     return { markdown: lines.join('\n'), trends };
   }
 
   Array.from(grouped.entries()).forEach(([category, categoryItems], index) => {
     const summary = summarizeCategory(category, categoryItems);
     trends.push({ category, summary, count: categoryItems.length, items: categoryItems.slice(0, 5) });
-    lines.push(`${index + 1}. **${category}**：${summary}`);
+    lines.push(`${index + 1}. **${category}**: ${summary}`);
   });
 
-  lines.push('', '## 重点趋势', '');
+  lines.push('', '## Key Trends', '');
   for (const trend of trends) {
-    lines.push(`### ${trend.category}`, '', trend.summary, '', '代表来源：');
+    lines.push(`### ${trend.category}`, '', trend.summary, '', 'Representative Sources:');
     for (const item of trend.items) {
       lines.push(`- [${item.title}](${item.url}) — ${item.source || 'Unknown'} · score ${item.score || 0}`);
     }
@@ -60,15 +60,15 @@ export function generateMarkdown(items: TrendSourceItem[], generatedAt: string):
   }
 
   lines.push(
-    '## 后续关注问题',
+    '## Follow-up Questions',
     '',
-    '- 哪些 Agent 工具链开始获得真实生产用户？',
-    '- 多模态能力是否从演示进入稳定业务流程？',
-    '- 开源模型与闭源模型在成本、性能和可控性上的差距是否缩小？',
+    '- Which Agent toolchains are gaining real production users?',
+    '- Has multimodal capability moved from demo to stable business workflows?',
+    '- Is the gap between open-source and closed-source models narrowing in cost, performance, and controllability?',
     '',
-    '## 说明',
+    '## Notes',
     '',
-    '本报告由模板从公开技术信息源自动生成，建议对关键事实继续核验原文链接。',
+    'This report is automatically generated from public technical sources. Please verify key facts against original links.',
   );
 
   return { markdown: lines.join('\n'), trends };
@@ -83,7 +83,7 @@ export function generateFallbackReport(items: TrendSourceItem[], runId: string, 
     trigger,
     generatedAt,
     itemCount: items.length,
-    summary: trends[0]?.summary || '暂无满足条件的 AI 趋势内容。',
+    summary: trends[0]?.summary || 'No qualified AI trend content found.',
     reportMarkdown: markdown,
     trends,
     items,

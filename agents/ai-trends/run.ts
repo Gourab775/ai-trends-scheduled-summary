@@ -105,8 +105,8 @@ export async function onRequest(context: any): Promise<Response> {
         failed.status = 'failed';
         failed.generatedAt = utcNow();
         failed.durationMs = Date.now() - started;
-        failed.summary = '生成失败';
-        failed.reportMarkdown = `# AI 趋势日报\n\n生成失败：${message}`;
+        failed.summary = 'Generation failed';
+        failed.reportMarkdown = `# AI Trend Daily\n\nGeneration failed: ${message}`;
         failed.error = message;
         const savedToMemory = await saveReportToMemory(context, failed).catch(() => false);
         if (!savedToMemory) await saveReport(failed);
